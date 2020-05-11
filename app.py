@@ -5,13 +5,15 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import Flask, render_template, request, Response, flash, redirect, \
+  url_for, abort
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 from forms import VenueForm, ArtistForm, ShowForm
 from flask_migrate import Migrate
+import sys
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -452,6 +454,7 @@ def edit_venue_submission(venue_id):
     # venue record with ID <venue_id> using the new attributes
     return redirect(url_for('show_venue', venue_id=venue_id))
 
+
 #  Create Artist
 #  ----------------------------------------------------------------
 
@@ -465,14 +468,51 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
     # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Venue record in the db, instead
+    # TODO: insert form data as a new Artist record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g.,
-    # flash('An error occurred. Artist ' + data.name + ' could not be listed.')
+    error = False
+
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    phone = request.form['phone']
+    genres = request.form['genres']
+    facebook_link = request.form['facebook_link']
+
+    try:
+        artist = Artist(
+          name=name,
+          city=city,
+          state=state,
+          phone=phone,
+          genres=genres,
+          facebook_link=facebook_link
+        )
+
+        db.session.add(artist)
+        db.session.commit()
+    except Exception:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        abort(400)
+        flash(
+          'An error occurred. Artist '
+          + name
+          + ' could not be listed.'
+        )
+    if not error:
+        flash(
+          'Artist '
+          + name
+          + ' was successfully listed!'
+        )
+
     return render_template('pages/home.html')
 
 
