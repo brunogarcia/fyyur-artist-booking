@@ -40,6 +40,7 @@ class Venue(db.Model):
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
+    genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
 
@@ -252,11 +253,52 @@ def create_venue_submission():
     # TODO: insert form data as a new Venue record in the db, instead
     # TODO: modify data to be the data object returned from db insertion
 
-    # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+    error = False
+
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    address = request.form['address']
+    phone = request.form['phone']
+    genres = request.form['genres']
+    facebook_link = request.form['facebook_link']
+
+    try:
+        venue = Venue(
+          name=name,
+          city=city,
+          state=state,
+          address=address,
+          phone=phone,
+          genres=genres,
+          facebook_link=facebook_link
+        )
+
+        db.session.add(venue)
+        db.session.commit()
+    except Exception:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        abort(400)
+        flash(
+          'An error occurred. Venue '
+          + name
+          + ' could not be listed.',
+          'danger'
+        )
+    if not error:
+        flash(
+          'Venue '
+          + name
+          + ' was successfully listed!',
+          'success'
+        )
+
     return render_template('pages/home.html')
 
 
@@ -504,13 +546,15 @@ def create_artist_submission():
         flash(
           'An error occurred. Artist '
           + name
-          + ' could not be listed.'
+          + ' could not be listed.',
+          'danger'
         )
     if not error:
         flash(
           'Artist '
           + name
-          + ' was successfully listed!'
+          + ' was successfully listed!',
+          'success'
         )
 
     return render_template('pages/home.html')
