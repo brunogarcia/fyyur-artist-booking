@@ -102,27 +102,43 @@ def venues():
     # TODO: replace with real venues data.
     # num_shows should be aggregated based
     # on number of upcoming shows per venue.
-    data = [{
-      "city": "San Francisco",
-      "state": "CA",
-      "venues": [{
-        "id": 1,
-        "name": "The Musical Hop",
-        "num_upcoming_shows": 0,
-      }, {
-        "id": 3,
-        "name": "Park Square Live Music & Coffee",
-        "num_upcoming_shows": 1,
-      }]
-    }, {
-      "city": "New York",
-      "state": "NY",
-      "venues": [{
-        "id": 2,
-        "name": "The Dueling Pianos Bar",
-        "num_upcoming_shows": 0,
-      }]
-    }]
+    # data = [{
+    #   "city": "San Francisco",
+    #   "state": "CA",
+    #   "venues": [{
+    #     "id": 1,
+    #     "name": "The Musical Hop",
+    #     "num_upcoming_shows": 0,
+    #   }, {
+    #     "id": 3,
+    #     "name": "Park Square Live Music & Coffee",
+    #     "num_upcoming_shows": 1,
+    #   }]
+    # }, {
+    #   "city": "New York",
+    #   "state": "NY",
+    #   "venues": [{
+    #     "id": 2,
+    #     "name": "The Dueling Pianos Bar",
+    #     "num_upcoming_shows": 0,
+    #   }]
+    # }]
+
+    data = []
+    areas = Venue.query.with_entities(Venue.city, Venue.state).all()
+
+    for city, state in dict(areas).items():
+        venues = Venue.query \
+          .with_entities(Venue.id, Venue.name) \
+          .filter(Venue.city == city) \
+          .filter(Venue.state == state) \
+          .all()
+
+        data.append({
+          'city': city,
+          'state': state,
+          'venues': venues
+        })
 
     return render_template('pages/venues.html', areas=data)
 
@@ -320,7 +336,6 @@ def delete_venue(venue_id):
 
 @app.route('/artists')
 def artists():
-    # TODO: replace with real data returned from querying the database
     data = Artist.query \
       .with_entities(Artist.id, Artist.name) \
       .order_by('id') \
