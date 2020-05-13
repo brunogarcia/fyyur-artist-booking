@@ -3,7 +3,6 @@
 # ----------------------------------------------------------------------------#
 
 import sys
-import json
 import babel
 import logging
 import dateutil.parser
@@ -270,7 +269,6 @@ def show_venue(venue_id):
     # }
 
     data = Venue.query.filter(Venue.id == venue_id).first()
-    data.genres = json.loads(data.genres)
     return render_template('pages/show_venue.html', venue=data)
 
 
@@ -421,7 +419,6 @@ def show_artist(artist_id):
     # }
 
     data = Artist.query.filter(Artist.id == artist_id).first()
-    data.genres = json.loads(data.genres)
     return render_template('pages/show_artist.html', artist=data)
 
 #  Update
