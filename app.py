@@ -10,7 +10,6 @@ from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from logging import Formatter, FileHandler
-from sqlalchemy.dialects.postgresql import JSON
 from forms import VenueForm, ArtistForm, ShowForm
 from flask import Flask, render_template, request, flash, redirect, \
   url_for, abort
@@ -60,7 +59,7 @@ class Venue(db.Model):
     state = db.Column(db.String(120))
     address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(JSON)
+    genres = db.Column(db.ARRAY(db.String))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     website = db.Column(db.String(120))
@@ -77,7 +76,7 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(JSON)
+    genres = db.Column(db.ARRAY(db.String))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     website = db.Column(db.String(120))
