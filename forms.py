@@ -1,8 +1,8 @@
 from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, \
-    DateTimeField
-from wtforms.validators import DataRequired, URL
+    DateTimeField, TextAreaField, BooleanField
+from wtforms.validators import DataRequired, URL, Length
 
 
 class ShowForm(FlaskForm):
@@ -88,9 +88,6 @@ class VenueForm(FlaskForm):
     phone = StringField(
         'phone'
     )
-    image_link = StringField(
-        'image_link'
-    )
     genres = SelectMultipleField(
         # TODO implement enum restriction
         'genres', validators=[DataRequired()],
@@ -116,8 +113,20 @@ class VenueForm(FlaskForm):
             ('Other', 'Other'),
         ]
     )
+    image_link = StringField(
+        'image_link', validators=[URL()]
+    )
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
+    )
+    website = StringField(
+        'website', validators=[URL()]
+    )
+    seeking_talent = BooleanField(
+        'seeking_talent'
+    )
+    seeking_description = TextAreaField(
+        'seeking_description', validators=[Length(min=10, max=500)]
     )
 
 
@@ -188,9 +197,6 @@ class ArtistForm(FlaskForm):
         # TODO implement validation logic for state
         'phone'
     )
-    image_link = StringField(
-        'image_link'
-    )
     genres = SelectMultipleField(
         # TODO implement enum restriction
         'genres', validators=[DataRequired()],
@@ -216,9 +222,20 @@ class ArtistForm(FlaskForm):
             ('Other', 'Other'),
         ]
     )
+    image_link = StringField(
+        'image_link', validators=[URL()]
+    )
     facebook_link = StringField(
-        # TODO implement enum restriction
         'facebook_link', validators=[URL()]
+    )
+    website = StringField(
+        'website', validators=[URL()]
+    )
+    seeking_venue = BooleanField(
+        'seeking_venue',
+    )
+    seeking_description = TextAreaField(
+        'seeking_description', validators=[Length(min=10, max=500)]
     )
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM

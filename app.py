@@ -51,9 +51,6 @@ class Show(db.Model):
       nullable=False,
     )
 
-    def __repr__(self):
-        return "Show(%s, %s)" % (self.venue_id, self.artist_id)
-
 
 class Venue(db.Model):
     __tablename__ = 'Venue'
@@ -67,6 +64,9 @@ class Venue(db.Model):
     genres = db.Column(JSON)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    seeking_talent = db.Column(db.Boolean, default=False)
+    seeking_description = db.Column(db.String(500))
     artists = db.relationship(
         "Artist",
         secondary=Show.__table__,
@@ -87,6 +87,9 @@ class Artist(db.Model):
     genres = db.Column(JSON)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    seeking_venue = db.Column(db.Boolean, default=False)
+    seeking_description = db.Column(db.String(500))
 
 
 # ----------------------------------------------------------------------------#
@@ -297,7 +300,11 @@ def create_venue_submission():
     address = request.form['address']
     phone = request.form['phone']
     genres = request.form.getlist('genres')
+    image_link = request.form['image_link']
     facebook_link = request.form['facebook_link']
+    website = request.form['website']
+    seeking_talent = True if 'seeking_talent' in request.form else False
+    seeking_description = request.form['seeking_description']
 
     try:
         venue = Venue(
@@ -307,7 +314,11 @@ def create_venue_submission():
           address=address,
           phone=phone,
           genres=genres,
-          facebook_link=facebook_link
+          image_link=image_link,
+          facebook_link=facebook_link,
+          website=website,
+          seeking_talent=seeking_talent,
+          seeking_description=seeking_description,
         )
 
         db.session.add(venue)
@@ -476,15 +487,15 @@ def edit_artist(artist_id):
     artist = {
       "id": 4,
       "name": "Guns N Petals",
-      "genres": ["Rock n Roll"],
       "city": "San Francisco",
       "state": "CA",
       "phone": "326-123-5000",
-      "website": "https://www.gunsnpetalsband.com",
+      "genres": ["Rock n Roll"],
+      "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
       "facebook_link": "https://www.facebook.com/GunsNPetals",
+      "website": "https://www.gunsnpetalsband.com",
       "seeking_venue": True,
       "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-      "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
     }
 
     # TODO: populate form with fields from artist with ID <artist_id>
@@ -505,16 +516,16 @@ def edit_venue(venue_id):
     venue = {
       "id": 1,
       "name": "The Musical Hop",
-      "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-      "address": "1015 Folsom Street",
       "city": "San Francisco",
       "state": "CA",
+      "address": "1015 Folsom Street",
       "phone": "123-123-1234",
-      "website": "https://www.themusicalhop.com",
+      "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
+      "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
       "facebook_link": "https://www.facebook.com/TheMusicalHop",
+      "website": "https://www.themusicalhop.com",
       "seeking_talent": True,
       "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-      "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
     }
 
     # TODO: populate form with values from venue with ID <venue_id>
@@ -551,7 +562,11 @@ def create_artist_submission():
     state = request.form['state']
     phone = request.form['phone']
     genres = request.form.getlist('genres')
+    image_link = request.form['image_link']
     facebook_link = request.form['facebook_link']
+    website = request.form['website']
+    seeking_venue = True if 'seeking_venue' in request.form else False
+    seeking_description = request.form['seeking_description']
 
     try:
         artist = Artist(
@@ -560,7 +575,11 @@ def create_artist_submission():
           state=state,
           phone=phone,
           genres=genres,
-          facebook_link=facebook_link
+          image_link=image_link,
+          facebook_link=facebook_link,
+          website=website,
+          seeking_venue=seeking_venue,
+          seeking_description=seeking_description,
         )
 
         db.session.add(artist)
