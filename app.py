@@ -734,7 +734,7 @@ def create_show_submission():
         )
     if not error:
         flash(
-          'Show was successfully listed!'
+          'Show was successfully listed!',
           'success'
         )
 
