@@ -483,39 +483,90 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    form = ArtistForm()
-    artist = {
-      "id": 4,
-      "name": "Guns N Petals",
-      "city": "San Francisco",
-      "state": "CA",
-      "phone": "326-123-5000",
-      "genres": ["Rock n Roll"],
-      "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-      "facebook_link": "https://www.facebook.com/GunsNPetals",
-      "website": "https://www.gunsnpetalsband.com",
-      "seeking_venue": True,
-      "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    }
+    # Request artist data
+    artist = Artist.query.filter(Artist.id == artist_id).first()
 
-    # TODO: populate form with fields from artist with ID <artist_id>
+    # Fill artist form
+    form = ArtistForm()
+    form.name.data = artist.name
+    form.city.data = artist.city
+    form.state.data = artist.state
+    form.phone.data = artist.phone
+    form.genres.data = artist.genres
+    form.image_link.data = artist.image_link
+    form.facebook_link.data = artist.facebook_link
+    form.website.data = artist.website
+    form.seeking_venue.data = artist.seeking_venue
+    form.seeking_description.data = artist.seeking_description
+
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-    # TODO: take values from the form submitted, and update existing
-    # artist record with ID <artist_id> using the new attributes
+    error = False
+
+    name = request.form['name']
+    city = request.form['city']
+    state = request.form['state']
+    phone = request.form['phone']
+    genres = request.form.getlist('genres')
+    image_link = request.form['image_link']
+    facebook_link = request.form['facebook_link']
+    website = request.form['website']
+    seeking_talent = True if 'seeking_talent' in request.form else False
+    seeking_description = request.form['seeking_description']
+
+    try:
+        # Request artist by id
+        artist = Artist.query.get(artist_id)
+
+        # Update artist data
+        artist.name = name
+        artist.city = city
+        artist.state = state
+        artist.phone = phone
+        artist.genres = genres
+        artist.image_link = image_link
+        artist.facebook_link = facebook_link
+        artist.website = website
+        artist.seeking_talent = seeking_talent
+        artist.seeking_description = seeking_description
+
+        # Submit changes
+        db.session.commit()
+    except Exception:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+
+    if error:
+        abort(400)
+        flash(
+          'An error occurred. Artist '
+          + name
+          + ' could not be updated.',
+          'danger'
+        )
+    if not error:
+        flash(
+          'Artist '
+          + name
+          + ' was successfully updated!',
+          'success'
+        )
 
     return redirect(url_for('show_artist', artist_id=artist_id))
 
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    # Data
+    # Request venue data
     venue = Venue.query.filter(Venue.id == venue_id).first()
 
-    # Form
+    # Fill venue form
     form = VenueForm()
     form.name.data = venue.name
     form.city.data = venue.city
@@ -605,10 +656,6 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-    # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Artist record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
-
     error = False
 
     name = request.form['name']
@@ -683,6 +730,7 @@ def shows():
         .query(
           Venue.name,
           Artist.name,
+          Artist.image_link,
           Show.venue_id,
           Show.artist_id,
           Show.start_time
@@ -693,10 +741,10 @@ def shows():
         data.append({
           'venue_name': show[0],
           'artist_name': show[1],
-          'venue_id': show[2],
-          'artist_id': show[3],
-          # TODO: artist_image_link
-          'start_time': str(show[4])
+          'artist_image_link': show[2],
+          'venue_id': show[3],
+          'artist_id': show[4],
+          'start_time': str(show[5])
         })
 
     return render_template('pages/shows.html', shows=data)
