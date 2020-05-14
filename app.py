@@ -116,9 +116,6 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # TODO: replace with real venues data.
-    # num_shows should be aggregated based
-    # on number of upcoming shows per venue.
     # data = [{
     #   "city": "San Francisco",
     #   "state": "CA",
@@ -126,24 +123,14 @@ def venues():
     #     "id": 1,
     #     "name": "The Musical Hop",
     #     "num_upcoming_shows": 0,
-    #   }, {
-    #     "id": 3,
-    #     "name": "Park Square Live Music & Coffee",
-    #     "num_upcoming_shows": 1,
-    #   }]
-    # }, {
-    #   "city": "New York",
-    #   "state": "NY",
-    #   "venues": [{
-    #     "id": 2,
-    #     "name": "The Dueling Pianos Bar",
-    #     "num_upcoming_shows": 0,
-    #   }]
-    # }]
+    #   }
 
     data = []
+
+    # Get areas
     areas = Venue.query.with_entities(Venue.city, Venue.state).all()
 
+    # Get city and state
     for city, state in dict(areas).items():
         venues = Venue.query \
           .with_entities(Venue.id, Venue.name) \
@@ -151,6 +138,7 @@ def venues():
           .filter(Venue.state == state) \
           .all()
 
+        # Map data
         data.append({
           'city': city,
           'state': state,
@@ -170,14 +158,17 @@ def search_venues():
     #     "num_upcoming_shows": 0,
     #   }]
     # }
+    # Get search data
     search_term = request.form['search_term']
     search = "%{}%".format(search_term)
 
+    # Search venues
     response = Venue.query \
         .with_entities(Venue.id, Venue.name) \
         .filter(Venue.name.match(search)) \
         .all()
 
+    # Map data
     results = {
         'data': response,
         'count': len(response)
@@ -195,18 +186,6 @@ def show_venue(venue_id):
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
     # data1 = {
-    #   "id": 1,
-    #   "name": "The Musical Hop",
-    #   "genres": ["Jazz", "Reggae", "Swing", "Classical", "Folk"],
-    #   "address": "1015 Folsom Street",
-    #   "city": "San Francisco",
-    #   "state": "CA",
-    #   "phone": "123-123-1234",
-    #   "website": "https://www.themusicalhop.com",
-    #   "facebook_link": "https://www.facebook.com/TheMusicalHop",
-    #   "seeking_talent": True,
-    #   "seeking_description": "We are on the lookout for a local artist to play every two weeks. Please call us.",
-    #   "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
     #   "past_shows": [{
     #     "artist_id": 4,
     #     "artist_name": "Guns N Petals",
@@ -236,6 +215,7 @@ def create_venue_form():
 def create_venue_submission():
     error = False
 
+    # Get data
     name = request.form['name']
     city = request.form['city']
     state = request.form['state']
@@ -249,6 +229,7 @@ def create_venue_submission():
     seeking_description = request.form['seeking_description']
 
     try:
+        # Create model
         venue = Venue(
           name=name,
           city=city,
@@ -263,6 +244,7 @@ def create_venue_submission():
           seeking_description=seeking_description,
         )
 
+        # Update DB
         db.session.add(venue)
         db.session.commit()
     except Exception:
@@ -272,6 +254,7 @@ def create_venue_submission():
     finally:
         db.session.close()
 
+    # Show banner
     if error:
         abort(400)
         flash(
@@ -327,14 +310,17 @@ def search_artists():
     #     "num_upcoming_shows": 0,
     #   }]
     # }
+    # Get search data
     search_term = request.form['search_term']
     search = "%{}%".format(search_term)
 
+    # Search artist
     response = Artist.query \
         .with_entities(Artist.id, Artist.name) \
         .filter(Artist.name.match(search)) \
         .all()
 
+    # Map data
     results = {
         'data': response,
         'count': len(response)
@@ -352,17 +338,6 @@ def show_artist(artist_id):
     # shows the venue page with the given venue_id
     # TODO: replace with real venue data from the venues table, using venue_id
     # data1 = {
-    #   "id": 4,
-    #   "name": "Guns N Petals",
-    #   "genres": ["Rock n Roll"],
-    #   "city": "San Francisco",
-    #   "state": "CA",
-    #   "phone": "326-123-5000",
-    #   "website": "https://www.gunsnpetalsband.com",
-    #   "facebook_link": "https://www.facebook.com/GunsNPetals",
-    #   "seeking_venue": True,
-    #   "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
-    #   "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
     #   "past_shows": [{
     #     "venue_id": 1,
     #     "venue_name": "The Musical Hop",
@@ -404,6 +379,7 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
     error = False
 
+    # Get data
     name = request.form['name']
     city = request.form['city']
     state = request.form['state']
@@ -431,7 +407,7 @@ def edit_artist_submission(artist_id):
         artist.seeking_talent = seeking_talent
         artist.seeking_description = seeking_description
 
-        # Submit changes
+        # Update DB
         db.session.commit()
     except Exception:
         error = True
@@ -485,6 +461,7 @@ def edit_venue(venue_id):
 def edit_venue_submission(venue_id):
     error = False
 
+    # Get data
     name = request.form['name']
     city = request.form['city']
     state = request.form['state']
@@ -514,7 +491,7 @@ def edit_venue_submission(venue_id):
         venue.seeking_talent = seeking_talent
         venue.seeking_description = seeking_description
 
-        # Submit changes
+        # Update DB
         db.session.commit()
     except Exception:
         error = True
@@ -523,6 +500,7 @@ def edit_venue_submission(venue_id):
     finally:
         db.session.close()
 
+    # Show banner
     if error:
         abort(400)
         flash(
@@ -556,6 +534,7 @@ def create_artist_form():
 def create_artist_submission():
     error = False
 
+    # Get data
     name = request.form['name']
     city = request.form['city']
     state = request.form['state']
@@ -568,6 +547,7 @@ def create_artist_submission():
     seeking_description = request.form['seeking_description']
 
     try:
+        # Create model
         artist = Artist(
           name=name,
           city=city,
@@ -581,6 +561,7 @@ def create_artist_submission():
           seeking_description=seeking_description,
         )
 
+        # Update DB
         db.session.add(artist)
         db.session.commit()
     except Exception:
@@ -590,6 +571,7 @@ def create_artist_submission():
     finally:
         db.session.close()
 
+    # Show banner
     if error:
         abort(400)
         flash(
@@ -615,6 +597,8 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
     data = []
+
+    # Get data
     shows = db.session \
         .query(
           Venue.name,
@@ -626,6 +610,7 @@ def shows():
         ) \
         .filter(Venue.id == Show.venue_id, Artist.id == Show.artist_id)
 
+    # Map data
     for show in shows:
         data.append({
           'venue_name': show[0],
@@ -641,7 +626,6 @@ def shows():
 
 @app.route('/shows/create', methods=['GET'])
 def create_shows():
-    # renders form. do not touch.
     form = ShowForm()
     return render_template('forms/new_show.html', form=form)
 
@@ -650,17 +634,20 @@ def create_shows():
 def create_show_submission():
     error = False
 
+    # Get data
     artist_id = request.form['artist_id']
     venue_id = request.form['venue_id']
     start_time = request.form['start_time']
 
     try:
+        # Create model
         show = Show(
           artist_id=artist_id,
           venue_id=venue_id,
           start_time=start_time,
         )
 
+        # Update DB
         db.session.add(show)
         db.session.commit()
     except Exception:
@@ -670,6 +657,7 @@ def create_show_submission():
     finally:
         db.session.close()
 
+    # Show banner
     if error:
         abort(400)
         flash(
