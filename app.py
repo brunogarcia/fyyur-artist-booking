@@ -6,6 +6,7 @@ import sys
 import babel
 import logging
 import dateutil.parser
+from datetime import datetime
 from flask_moment import Moment
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -116,62 +117,83 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # data = [{
-    #   "city": "San Francisco",
-    #   "state": "CA",
-    #   "venues": [{
-    #     "id": 1,
-    #     "name": "The Musical Hop",
-    #     "num_upcoming_shows": 0,
-    #   }
-
-    data = []
+    data_areas = []
 
     # Get areas
-    areas = Venue.query.with_entities(Venue.city, Venue.state).all()
+    areas = Venue.query \
+        .with_entities(Venue.city, Venue.state) \
+        .group_by(Venue.city, Venue.state) \
+        .all()
 
-    # Get city and state
-    for city, state in dict(areas).items():
+    # Iterate over each area
+    for area in areas:
+        data_venues = []
+
+        # Get venues by area
         venues = Venue.query \
-          .with_entities(Venue.id, Venue.name) \
-          .filter(Venue.city == city) \
-          .filter(Venue.state == state) \
-          .all()
+            .filter_by(state=area.state) \
+            .filter_by(city=area.city) \
+            .all()
 
-        # Map data
-        data.append({
-          'city': city,
-          'state': state,
-          'venues': venues
+        # Iterate over each venue
+        for venue in venues:
+            # Get upcoming shows by venue
+            upcoming_shows = db.session \
+                    .query(Show) \
+                    .filter(Show.venue_id == venue.id) \
+                    .filter(Show.start_time > datetime.now()) \
+                    .all()
+
+            # Map venues
+            data_venues.append({
+                'id': venue.id,
+                'name': venue.name,
+                'num_upcoming_shows': len(upcoming_shows)
+            })
+
+        # Map areas
+        data_areas.append({
+            'city': area.city,
+            'state': area.state,
+            'venues': data_venues
         })
 
-    return render_template('pages/venues.html', areas=data)
+    return render_template('pages/venues.html', areas=data_areas)
 
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # response = {
-    #   "count": 1,
-    #   "data": [{
-    #     "id": 2,
-    #     "name": "The Dueling Pianos Bar",
-    #     "num_upcoming_shows": 0,
-    #   }]
-    # }
-    # Get search data
+    # Prepare search data
     search_term = request.form['search_term']
     search = "%{}%".format(search_term)
 
-    # Search venues
-    response = Venue.query \
+    # Get venues
+    venues = Venue.query \
         .with_entities(Venue.id, Venue.name) \
         .filter(Venue.name.match(search)) \
         .all()
 
-    # Map data
+    # Iterate over each venue
+    data_venues = []
+    for venue in venues:
+        # Get upcoming shows by venue
+        upcoming_shows = db.session \
+                .query(Show) \
+                .filter(Show.venue_id == venue.id) \
+                .filter(Show.start_time > datetime.now()) \
+                .all()
+
+        # Map venues
+        data_venues.append({
+            'id': venue.id,
+            'name': venue.name,
+            'num_upcoming_shows': len(upcoming_shows)
+        })
+
+    # Map results
     results = {
-        'data': response,
-        'count': len(response)
+        'venues': data_venues,
+        'count': len(venues)
     }
 
     return render_template(
@@ -183,22 +205,64 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
-    # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
-    # data1 = {
-    #   "past_shows": [{
-    #     "artist_id": 4,
-    #     "artist_name": "Guns N Petals",
-    #     "artist_image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80",
-    #     "start_time": "2019-05-21T21:30:00.000Z"
-    #   }],
-    #   "upcoming_shows": [],
-    #   "past_shows_count": 1,
-    #   "upcoming_shows_count": 0,
-    # }
+    # Get venue
+    data_venue = Venue.query.filter(Venue.id == venue_id).first()
 
-    data = Venue.query.filter(Venue.id == venue_id).first()
-    return render_template('pages/show_venue.html', venue=data)
+    # Get the upcoming shows of this venue
+    upcoming_shows = Show.query \
+        .filter(Show.venue_id == venue_id) \
+        .filter(Show.start_time > datetime.now()) \
+        .all()
+
+    if len(upcoming_shows) > 0:
+        data_upcoming_shows = []
+
+        # Iterate over each upcoming show
+        for upcoming_show in upcoming_shows:
+            artist = Artist.query \
+                .filter(Artist.id == upcoming_show.artist_id) \
+                .first()
+
+            # Map upcoming shows
+            data_upcoming_shows.append({
+                'artist_id': artist.id,
+                'artist_name': artist.name,
+                'artist_image_link': artist.image_link,
+                'start_time': str(upcoming_show.start_time),
+            })
+
+        # Add shows data
+        data_venue.upcoming_shows = data_upcoming_shows
+        data_venue.upcoming_shows_count = len(data_upcoming_shows)
+
+    # Get the past shows of this venue
+    past_shows = Show.query \
+        .filter(Show.venue_id == venue_id) \
+        .filter(Show.start_time < datetime.now()) \
+        .all()
+
+    if len(past_shows) > 0:
+        data_past_shows = []
+
+        # Iterate over each past show
+        for past_show in past_shows:
+            artist = Artist.query \
+                .filter(Artist.id == past_show.artist_id) \
+                .first()
+
+            # Map past shows
+            data_past_shows.append({
+                'artist_id': artist.id,
+                'artist_name': artist.name,
+                'artist_image_link': artist.image_link,
+                'start_time': str(past_show.start_time),
+            })
+
+        # Add shows data
+        data_venue.past_shows = data_past_shows
+        data_venue.past_shows_count = len(data_past_shows)
+
+    return render_template('pages/show_venue.html', venue=data_venue)
 
 
 #  Create Venue
