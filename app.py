@@ -399,31 +399,73 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
-    # shows the venue page with the given venue_id
-    # TODO: replace with real venue data from the venues table, using venue_id
-    # data1 = {
-    #   "past_shows": [{
-    #     "venue_id": 1,
-    #     "venue_name": "The Musical Hop",
-    #     "venue_image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60",
-    #     "start_time": "2019-05-21T21:30:00.000Z"
-    #   }],
-    #   "upcoming_shows": [],
-    #   "past_shows_count": 1,
-    #   "upcoming_shows_count": 0,
-    # }
+    # Get artist
+    data_artist = Artist.query.filter(Artist.id == artist_id).first()
 
-    data = Artist.query.filter(Artist.id == artist_id).first()
-    return render_template('pages/show_artist.html', artist=data)
+    # Get the upcoming shows of this artist
+    upcoming_shows = Show.query \
+        .filter(Show.artist_id == artist_id) \
+        .filter(Show.start_time > datetime.now()) \
+        .all()
+
+    if len(upcoming_shows) > 0:
+        data_upcoming_shows = []
+
+        # Iterate over each upcoming show
+        for upcoming_show in upcoming_shows:
+            venue = Venue.query \
+                .filter(Venue.id == upcoming_show.venue_id) \
+                .first()
+
+            # Map upcoming shows
+            data_upcoming_shows.append({
+                'venue_id': venue.id,
+                'venue_name': venue.name,
+                'venue_image_link': venue.image_link,
+                'start_time': str(upcoming_show.start_time),
+            })
+
+        # Add shows data
+        data_artist.upcoming_shows = data_upcoming_shows
+        data_artist.upcoming_shows_count = len(data_upcoming_shows)
+
+    # Get the past shows of this venue
+    past_shows = Show.query \
+        .filter(Show.artist_id == artist_id) \
+        .filter(Show.start_time < datetime.now()) \
+        .all()
+
+    if len(past_shows) > 0:
+        data_past_shows = []
+
+        # Iterate over each past show
+        for past_show in past_shows:
+            venue = Venue.query \
+                .filter(Venue.id == upcoming_show.venue_id) \
+                .first()
+
+            # Map past shows
+            data_past_shows.append({
+                'venue_id': venue.id,
+                'venue_name': venue.name,
+                'venue_image_link': venue.image_link,
+                'start_time': str(past_show.start_time),
+            })
+
+        # Add shows data
+        data_artist.past_shows = data_past_shows
+        data_artist.past_shows_count = len(data_past_shows)
+
+    return render_template('pages/show_artist.html', artist=data_artist)
 
 #  Update
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
-    # Request artist data
+    # Request data
     artist = Artist.query.filter(Artist.id == artist_id).first()
 
-    # Fill artist form
+    # Fill form
     form = ArtistForm()
     form.name.data = artist.name
     form.city.data = artist.city
@@ -501,10 +543,10 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
-    # Request venue data
+    # Request data
     venue = Venue.query.filter(Venue.id == venue_id).first()
 
-    # Fill venue form
+    # Fill form
     form = VenueForm()
     form.name.data = venue.name
     form.city.data = venue.city
