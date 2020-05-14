@@ -2,15 +2,28 @@
 {% block title %}Fyyur | Artists{% endblock %}
 {% block content %}
 <ul class="items">
-	{% for artist in artists %}
-	<li>
-		<a href="/artists/{{ artist.id }}">
-			<i class="fas fa-users"></i>
-			<div class="item">
-				<h5>{{ artist.name }}</h5>
-			</div>
-		</a>
-	</li>
-	{% endfor %}
+  {% for artist in artists %}
+  <li>
+    <a href="/artists/{{ artist.id }}">
+      <i class="fas fa-users"></i>
+      <div class="item">
+        <h5>
+          {{ artist.name }}
+
+          {% if artist.num_upcoming_shows > 0 %}
+          <span class="label label-success">
+            {{ artist.num_upcoming_shows }} upcoming
+            {% if artist.num_upcoming_shows == 1 %}
+              show
+            {% else %}
+              shows
+            {% endif %}
+          </span>
+          {% endif %}
+        </h5>
+      </div>
+    </a>
+  </li>
+  {% endfor %}
 </ul>
 {% endblock %}

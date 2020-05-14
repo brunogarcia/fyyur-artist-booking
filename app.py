@@ -356,12 +356,31 @@ def delete_venue(venue_id):
 
 @app.route('/artists')
 def artists():
-    data = Artist.query \
-      .with_entities(Artist.id, Artist.name) \
-      .order_by('id') \
-      .all()
+    data_artists = []
 
-    return render_template('pages/artists.html', artists=data)
+    # Get artists
+    artists = Artist.query \
+        .with_entities(Artist.id, Artist.name) \
+        .order_by('id') \
+        .all()
+
+    # Iterate over each artist
+    for artist in artists:
+        # Get upcoming shows
+        upcoming_shows = db.session \
+                .query(Show) \
+                .filter(Show.artist_id == artist.id) \
+                .filter(Show.start_time > datetime.now()) \
+                .all()
+
+        # Map artists
+        data_artists.append({
+            'id': artist.id,
+            'name': artist.name,
+            'num_upcoming_shows': len(upcoming_shows)
+        })
+
+    return render_template('pages/artists.html', artists=data_artists)
 
 
 @app.route('/artists/search', methods=['POST'])
@@ -374,20 +393,38 @@ def search_artists():
     #     "num_upcoming_shows": 0,
     #   }]
     # }
-    # Get search data
+
+    # Prepare search data
     search_term = request.form['search_term']
     search = "%{}%".format(search_term)
 
-    # Search artist
-    response = Artist.query \
+    # Get artists
+    artists = Artist.query \
         .with_entities(Artist.id, Artist.name) \
         .filter(Artist.name.match(search)) \
         .all()
 
+    # Iterate over each artist
+    data_artists = []
+    for artist in artists:
+        # Get upcoming shows
+        upcoming_shows = db.session \
+                .query(Show) \
+                .filter(Show.artist_id == artist.id) \
+                .filter(Show.start_time > datetime.now()) \
+                .all()
+
+        # Map artists
+        data_artists.append({
+            'id': artist.id,
+            'name': artist.name,
+            'num_upcoming_shows': len(upcoming_shows)
+        })
+
     # Map data
     results = {
-        'data': response,
-        'count': len(response)
+        'data': data_artists,
+        'count': len(artists)
     }
 
     return render_template(

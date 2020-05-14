@@ -14,7 +14,12 @@
 
             {% if venue.num_upcoming_shows > 0 %}
             <span class="label label-success">
-              {{ venue.num_upcoming_shows }} upcoming shows
+              {{ venue.num_upcoming_shows }} upcoming
+              {% if venue.num_upcoming_shows == 1 %}
+                show
+              {% else %}
+                shows
+              {% endif %}
             </span>
             {% endif %}
           </h5>
