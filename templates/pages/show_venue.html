@@ -8,7 +8,7 @@
     </h1>
 
     <p class="subtitle">
-      ID: {{ venue.id }}
+      ID: {{ venue.id }}>
     </p>
 
     <div class="genres">
@@ -61,6 +61,15 @@
       No Facebook Link
       {% endif %}
     </p>
+
+    <form method="post" action="/venues/{{venue.id}}">
+      <p>
+        <i class="fas fa-trash"></i>
+        <button type="submit" class="btn btn-danger btn-xs">
+          Delete venue
+        </button>
+      </p>
+    </form>
   
     {% if venue.seeking_talent %}
     <div class="seeking">
@@ -84,6 +93,7 @@
   </div>
 </div>
 
+{% if venue.upcoming_shows %}
 <section>
   <h2 class="monospace">
     {{ venue.upcoming_shows_count }}
@@ -111,7 +121,9 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
+{% if venue.past_shows %}
 <section>
   <h2 class="monospace">
     {{ venue.past_shows_count }}
@@ -139,5 +151,6 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
 {% endblock %}

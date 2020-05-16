@@ -70,6 +70,7 @@
   </div>
 </div>
 
+{% if artist.upcoming_shows %}
 <section>
   <h2 class="monospace">
     {{ artist.upcoming_shows_count }} Upcoming
@@ -92,7 +93,9 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
+{% if artist.past_shows %}
 <section>
   <h2 class="monospace">
     {{ artist.past_shows_count }} Past
@@ -115,6 +118,7 @@
     {% endfor %}
   </div>
 </section>
+{% endif %}
 
 {% endblock %}
 

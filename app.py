@@ -338,17 +338,36 @@ def create_venue_submission():
     return render_template('pages/home.html')
 
 
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/<venue_id>', methods=['POST'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record.
-    # Handle cases where the session commit could fail.
+    error = False
 
-    # BONUS CHALLENGE:
-    # Implement a button to delete a Venue on a Venue Page,
-    # have it so that clicking that button delete it
-    # from the db then redirect the user to the homepage
-    return None
+    try:
+        venue = Venue.query.get(venue_id)
+        db.session.delete(venue)
+        db.session.commit()
+    except Exception as e:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+        return render_template('errors/500.html', error=str(e))
+    finally:
+        db.session.close()
+
+    # Show banner
+    if error:
+        abort(400)
+        flash(
+          'An error occurred. Venue could not be deleted.',
+          'danger'
+        )
+    if not error:
+        flash(
+          'Venue was successfully deleted!',
+          'success'
+        )
+
+    return render_template('pages/home.html')
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -385,15 +404,6 @@ def artists():
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # response = {
-    #   "count": 1,
-    #   "data": [{
-    #     "id": 4,
-    #     "name": "Guns N Petals",
-    #     "num_upcoming_shows": 0,
-    #   }]
-    # }
-
     # Prepare search data
     search_term = request.form['search_term']
     search = "%{}%".format(search_term)
