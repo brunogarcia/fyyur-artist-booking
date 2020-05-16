@@ -1,4 +1,4 @@
-INSERT INTO "Artist"(
+INSERT INTO "artists"(
   id, 
   name, 
   genres, 
@@ -25,7 +25,7 @@ VALUES (
   'https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80'
 );
 
-INSERT INTO "Artist"(
+INSERT INTO "artists"(
   id, 
   name, 
   genres, 
@@ -48,7 +48,7 @@ VALUES (
   'https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80'
 );
 
-INSERT INTO "Artist"(
+INSERT INTO "artists"(
   id, 
   name, 
   genres, 

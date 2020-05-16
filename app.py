@@ -32,27 +32,33 @@ migrate = Migrate(app, db)
 
 
 class Show(db.Model):
-    __tablename__ = 'Show'
+    __tablename__ = 'shows'
 
     id = db.Column(db.Integer, primary_key=True)
-    venue_id = db.Column(
-      db.Integer,
-      db.ForeignKey('Venue.id'),
-      nullable=False,
-    )
-    artist_id = db.Column(
-      db.Integer,
-      db.ForeignKey('Artist.id'),
-      nullable=False,
-    )
     start_time = db.Column(
       db.DateTime,
       nullable=False,
     )
 
+    # Venue
+    venue = db.relationship('Venue')
+    venue_id = db.Column(
+      db.Integer,
+      db.ForeignKey('venues.id', ondelete='CASCADE'),
+      nullable=False,
+    )
+
+    # Artist
+    artist = db.relationship('Artist')
+    artist_id = db.Column(
+      db.Integer,
+      db.ForeignKey('artists.id', ondelete='CASCADE'),
+      nullable=False,
+    )
+
 
 class Venue(db.Model):
-    __tablename__ = 'Venue'
+    __tablename__ = 'venues'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -66,11 +72,16 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(500))
-    shows = db.relationship('Show', backref="venue", lazy=True)
+    shows = db.relationship('Show')
+    artists = db.relationship(
+        'Artist',
+        secondary='shows',
+        back_populates='venues'
+    )
 
 
 class Artist(db.Model):
-    __tablename__ = 'Artist'
+    __tablename__ = 'artists'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
@@ -83,7 +94,12 @@ class Artist(db.Model):
     website = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean, default=False)
     seeking_description = db.Column(db.String(500))
-    shows = db.relationship('Show', backref="artist", lazy=True)
+    shows = db.relationship('Show')
+    venues = db.relationship(
+        'Venue',
+        secondary='shows',
+        back_populates='artists'
+    )
 
 # ----------------------------------------------------------------------------#
 # Filters.
@@ -343,8 +359,7 @@ def delete_venue(venue_id):
     error = False
 
     try:
-        venue = Venue.query.get(venue_id)
-        db.session.delete(venue)
+        Venue.query.filter_by(id=venue_id).delete()
         db.session.commit()
     except Exception as e:
         error = True

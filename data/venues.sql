@@ -1,4 +1,4 @@
-INSERT INTO "Venue"(
+INSERT INTO "venues"(
   id,
   name,
   genres,
@@ -24,10 +24,10 @@ VALUES (
   'https://www.facebook.com/TheMusicalHop',
   True,
   'We are on the lookout for a local artist to play every two weeks. Please call us.',
-  'https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60',
+  'https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60'
 );
 
-INSERT INTO "Venue"(
+INSERT INTO "venues"(
   id,
   name,
   genres,
@@ -54,7 +54,7 @@ VALUES (
   'https://images.unsplash.com/photo-1497032205916-ac775f0649ae?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80'
 );
 
-INSERT INTO "Venue"(
+INSERT INTO "venues"(
   id,
   name,
   genres,
