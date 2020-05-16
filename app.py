@@ -14,6 +14,7 @@ from logging import Formatter, FileHandler
 from forms import VenueForm, ArtistForm, ShowForm
 from flask import Flask, render_template, request, flash, redirect, \
   url_for, abort
+from flask_wtf.csrf import CsrfProtect
 
 # ----------------------------------------------------------------------------#
 # App Config.
@@ -22,8 +23,8 @@ from flask import Flask, render_template, request, flash, redirect, \
 app = Flask(__name__)
 moment = Moment(app)
 app.config.from_object('config')
+CsrfProtect(app)
 db = SQLAlchemy(app)
-
 migrate = Migrate(app, db)
 
 # ----------------------------------------------------------------------------#
@@ -116,6 +117,20 @@ def format_datetime(value, format='medium'):
 
 
 app.jinja_env.filters['datetime'] = format_datetime
+
+# ----------------------------------------------------------------------------#
+# Show form errors
+# ----------------------------------------------------------------------------#
+
+
+def show_form_errors(fieldName, errorMessages):
+    return flash(
+        'Some errors on ' +
+        fieldName.replace('_', ' ') +
+        ': ' +
+        ' '.join([str(message) for message in errorMessages]),
+        'warning'
+    )
 
 
 # ----------------------------------------------------------------------------#
@@ -294,6 +309,14 @@ def create_venue_form():
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
     error = False
+    form = VenueForm()
+
+    # Form validation
+    if not form.validate():
+        for fieldName, errorMessages in form.errors.items():
+            show_form_errors(fieldName, errorMessages)
+
+        return redirect(url_for('create_venue_form'))
 
     # Get data
     name = request.form['name']
@@ -701,6 +724,14 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
     error = False
+    form = ArtistForm()
+
+    # Form validation
+    if not form.validate():
+        for fieldName, errorMessages in form.errors.items():
+            show_form_errors(fieldName, errorMessages)
+
+        return redirect(url_for('create_artist_form'))
 
     # Get data
     name = request.form['name']

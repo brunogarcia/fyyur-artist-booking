@@ -2,7 +2,7 @@ from datetime import datetime
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SelectMultipleField, \
     DateTimeField, TextAreaField, BooleanField
-from wtforms.validators import DataRequired, URL, Length
+from wtforms.validators import DataRequired, URL, Length, Regexp
 
 
 class ShowForm(FlaskForm):
@@ -86,7 +86,10 @@ class VenueForm(FlaskForm):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'phone', validators=[Regexp(
+            r'^[0-9\-\+]+$', 0,
+            message='The phone must be valid'
+        )]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -194,8 +197,10 @@ class ArtistForm(FlaskForm):
         ]
     )
     phone = StringField(
-        # TODO implement validation logic for state
-        'phone'
+        'phone', validators=[Regexp(
+            r'^[0-9\-\+]+$', 0,
+            message='The phone must be valid'
+        )]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
