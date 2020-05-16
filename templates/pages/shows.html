@@ -2,26 +2,25 @@
 {% block title %}Fyyur | Shows{% endblock %}
 {% block content %}
 <div class="row shows">
-
-    {% if shows %}
-        {%for show in shows %}
-        <div class="col-sm-4">
-            <div class="tile tile-show">
-                <img src="{{ show.artist_image_link }}" alt="Artist Image" />
-                <h4>{{ show.start_time|datetime('full') }}</h4>
-                <h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
-                <p>playing at</p>
-                <h5><a href="/venues/{{ show.venue_id }}">{{ show.venue_name }}</a></h5>
-            </div>
-        </div>
-        {% endfor %}
-
-    {% else %}
-    <div class="alert alert-warning" role="alert">
-        <i class="fas fa-exclamation"></i>
-        <strong>Ups!</strong>
-        We don't have shows in this moment!
+  {% if shows %}
+  {%for show in shows %}
+  <div class="col-sm-4">
+    <div class="tile tile-show">
+      <img src="{{ show.artist_image_link }}" alt="Artist Image" />
+      <h4>{{ show.start_time|datetime('full') }}</h4>
+      <h5><a href="/artists/{{ show.artist_id }}">{{ show.artist_name }}</a></h5>
+      <p>playing at</p>
+      <h5><a href="/venues/{{ show.venue_id }}">{{ show.venue_name }}</a></h5>
     </div>
-    {% endif %}
+  </div>
+  {% endfor %}
+  
+  {% else %}
+  <div class="alert alert-warning" role="alert">
+    <i class="fas fa-music"></i>
+    <strong>Ups!</strong><br/>
+    We can't find any shows in this moment!
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

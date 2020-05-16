@@ -1,5 +1,4 @@
 INSERT INTO "venues"(
-  id,
   name,
   genres,
   address,
@@ -13,7 +12,6 @@ INSERT INTO "venues"(
   image_link
 )
 VALUES (
-  1,
   'The Musical Hop',
   ARRAY['Jazz', 'Reggae', 'Swing', 'Classical', 'Folk'],
   '1015 Folsom Street',
@@ -28,7 +26,6 @@ VALUES (
 );
 
 INSERT INTO "venues"(
-  id,
   name,
   genres,
   address,
@@ -41,7 +38,6 @@ INSERT INTO "venues"(
   image_link
 )
 VALUES (
-  2,
   'The Dueling Pianos Bar',
   ARRAY['Classical', 'R&B', 'Hip-Hop'],
   '335 Delancey Street',
@@ -55,7 +51,6 @@ VALUES (
 );
 
 INSERT INTO "venues"(
-  id,
   name,
   genres,
   address,
@@ -68,7 +63,6 @@ INSERT INTO "venues"(
   image_link
 )
 VALUES (
-  3,
   'Park Square Live Music & Coffee',
   ARRAY['Rock n Roll', 'Jazz', 'Classical', 'Folk'],
   '34 Whiskey Moore Ave',

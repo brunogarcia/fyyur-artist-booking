@@ -1,5 +1,4 @@
 INSERT INTO "artists"(
-  id, 
   name, 
   genres, 
   city, 
@@ -12,7 +11,6 @@ INSERT INTO "artists"(
   image_link 
 )
 VALUES (
-  4,
   'Guns N Petals',
   ARRAY['Rock n Roll'],
   'San Francisco',
@@ -26,7 +24,6 @@ VALUES (
 );
 
 INSERT INTO "artists"(
-  id, 
   name, 
   genres, 
   city, 
@@ -37,7 +34,6 @@ INSERT INTO "artists"(
   image_link 
 )
 VALUES (
-  5,
   'Matt Quevedo',
   ARRAY['Jazz'],
   'New York',
@@ -49,7 +45,6 @@ VALUES (
 );
 
 INSERT INTO "artists"(
-  id, 
   name, 
   genres, 
   city, 
@@ -59,7 +54,6 @@ INSERT INTO "artists"(
   image_link 
 )
 VALUES (
-  6,
   'The Wild Sax Band',
   ARRAY['Jazz', 'Classical'],
   'San Francisco',
